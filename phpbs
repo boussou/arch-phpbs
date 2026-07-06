@@ -351,8 +351,6 @@ _phpbs_set_vars() {
         'apache'
         'ncurses'
         'libxcrypt'
-        'systemd'
-        'systemd-libs'
         'coreutils'
         'findutils'
     )
@@ -560,7 +558,6 @@ _phpbs_set_vars() {
 
     _phpextensions_fpm+=" --with-fpm-user=${_fpm_user} "
     _phpextensions_fpm+=" --with-fpm-group=${_fpm_group} "
-    _phpextensions_fpm+=" --with-fpm-systemd "
     _phpextensions_fpm+=" --with-fpm-acl "
 
     # Basic submodules. Cli shoud be first!
@@ -1763,7 +1760,7 @@ package_php___PHPBASE___-fpm___SUFFIX___() {
     _sapi="fpm"
     install="php-fpm.install"
     pkgdesc="FastCGI Process Manager for ${pkgbase}"
-    depends=("${pkgbase}=${pkgver}" 'systemd-libs' 'acl')
+    depends=("${pkgbase}=${pkgver}" 'acl')
     depends+=("${_sapi_depends[@]}")
     backup=("${_build_sapi_ini_fpm}/php-fpm.conf")
     if ((_phpbase >= 70)); then
@@ -1781,7 +1778,6 @@ package_php___PHPBASE___-fpm___SUFFIX___() {
         install -D -m644 "../php-${pkgver}/php.ini-production" "${pkgdir}/${_build_sapi_ini_fpm}/php.ini"
     fi
     make -j1 INSTALL_ROOT="${pkgdir}" install-fpm
-    install -D -m644 "sapi/fpm/php-fpm.service" "${pkgdir}/usr/lib/systemd/system/${_build_fpm_service_name}.service"
     echo "d /run/${_build_fpm_service_name} 755 root root" > php-fpm.tmpfiles
     install -D -m644 "php-fpm.tmpfiles" "${pkgdir}/usr/lib/tmpfiles.d/${_build_fpm_service_name}.conf"
     popd
@@ -1792,7 +1788,7 @@ package_php___PHPBASE___-fpm___SUFFIX___() {
 package_php___PHPBASE___-embed___SUFFIX___() {
     _sapi="embed"
     pkgdesc="Embedded PHP SAPI library for ${pkgbase}"
-    depends=("${pkgbase}=${pkgver}" 'ncurses' 'systemd-libs' 'libxcrypt' 'acl' 'ncurses')
+    depends=("${pkgbase}=${pkgver}" 'ncurses' 'libxcrypt' 'acl' 'ncurses')
     depends+=("${_sapi_depends[@]}")
     options=('!emptydirs')
     if ((_build_ini_per_sapi)); then
