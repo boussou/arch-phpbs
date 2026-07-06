@@ -229,7 +229,7 @@ _phpbs_set_vars() {
         'krb5'
         'zlib'
         'libedit'
-        'smtp-forwarder'
+        'exim'
         'pcre'
         'apache'
         'ncurses'
@@ -466,7 +466,7 @@ _phpbs_set_vars() {
     _make_dependencies_ldap=('libsasl' 'libldap')
     _make_dependencies_dblib=('freetds')
     _make_dependencies_pgsql=('postgresql-libs')
-    _make_dependencies_enchant=('enchant' 'libvoikko' 'hspell' 'hunspell' 'nuspell' 'aspell')
+    _make_dependencies_enchant=('enchant' 'hunspell' 'aspell')
     _make_dependencies_curl=('curl')
     _make_dependencies_odbc=('unixodbc')
     _make_dependencies_dba=('db5.3')
@@ -477,7 +477,7 @@ _phpbs_set_vars() {
     _make_dependencies_snmp=('net-snmp')
     _make_dependencies_sqlite=('sqlite')
     _make_dependencies_pspell=('aspell')
-    _make_dependencies_imap=('c-client' 'pam')
+    _make_dependencies_imap=('uw-imap' 'pam')
     _make_dependencies_recode=('recode')
 
     # CONSTRAINTS
@@ -568,7 +568,7 @@ _phpbs_set_vars() {
                         _ext_depends_openssl+=("openssl")
                         ;;
                     imap)
-                        _ext_depends_imap=("${pkgbase}=${pkgver}" 'pam' 'krb5' 'c-client' 'libxcrypt')
+                        _ext_depends_imap=("${pkgbase}=${pkgver}" 'pam' 'krb5' 'uw-imap' 'libxcrypt')
                         _ext_depends_imap+=("openssl")
                         _phpextensions+=" --with-${i}=shared,/usr --with-${i}-ssl=yes ";
                         ;;
@@ -1193,7 +1193,7 @@ fi
 #@@@PKGBUILD_START@@@
 options=('!lto')
 arch=("$CARCH")
-checkdepends=('procps-ng' 'smtp-forwarder')
+checkdepends=('procps-ng' 'exim')
 license=('PHP')
 url='http://www.php.net'
 
@@ -2090,7 +2090,7 @@ package_php___PHPBASE___-gmp___SUFFIX___() {
 # Enchant
 package_php___PHPBASE___-enchant___SUFFIX___() {
     pkgdesc="enchant module for ___PKGBASE___"
-    depends=("___PKGBASE___=${pkgver}" 'enchant' 'libvoikko' 'hspell' 'hunspell' 'nuspell' 'aspell')
+    depends=("___PKGBASE___=${pkgver}" 'enchant' 'hunspell' 'aspell')
     _install_module enchant
 }
 
