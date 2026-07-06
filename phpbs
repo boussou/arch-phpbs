@@ -4,6 +4,8 @@ build_sourcepkg="${BUILD_SOURCE:-1}"
 build_binpkg="${BUILD_BINARY:-1}"
 skip_sums="${SKIP_SUMS:-0}"
 skip_build_check=1
+# Enable systemd integration for FPM (disabled by default, set to 1 to enable)
+build_systemd="${BUILD_SYSTEMD:-0}"
 
 # Regex patterns for parsing makepkg output (stored in variables to avoid bash parsing issues)
 _re_target_not_found='error: target not found: (.+)'
@@ -354,6 +356,9 @@ _phpbs_set_vars() {
         'coreutils'
         'findutils'
     )
+    if ((build_systemd)); then
+        makedepends+=('systemd' 'systemd-libs')
+    fi
 
     if ((_build_uses_argon)); then
         makedepends+=('argon2')
@@ -558,6 +563,9 @@ _phpbs_set_vars() {
 
     _phpextensions_fpm+=" --with-fpm-user=${_fpm_user} "
     _phpextensions_fpm+=" --with-fpm-group=${_fpm_group} "
+    if ((build_systemd)); then
+        _phpextensions_fpm+=" --with-fpm-systemd "
+    fi
     _phpextensions_fpm+=" --with-fpm-acl "
 
     # Basic submodules. Cli shoud be first!
@@ -1761,6 +1769,9 @@ package_php___PHPBASE___-fpm___SUFFIX___() {
     install="php-fpm.install"
     pkgdesc="FastCGI Process Manager for ${pkgbase}"
     depends=("${pkgbase}=${pkgver}" 'acl')
+    if ((build_systemd)); then
+        depends+=('systemd-libs')
+    fi
     depends+=("${_sapi_depends[@]}")
     backup=("${_build_sapi_ini_fpm}/php-fpm.conf")
     if ((_phpbase >= 70)); then
@@ -1778,6 +1789,9 @@ package_php___PHPBASE___-fpm___SUFFIX___() {
         install -D -m644 "../php-${pkgver}/php.ini-production" "${pkgdir}/${_build_sapi_ini_fpm}/php.ini"
     fi
     make -j1 INSTALL_ROOT="${pkgdir}" install-fpm
+    if ((build_systemd)); then
+        install -D -m644 "sapi/fpm/php-fpm.service" "${pkgdir}/usr/lib/systemd/system/${_build_fpm_service_name}.service"
+    fi
     echo "d /run/${_build_fpm_service_name} 755 root root" > php-fpm.tmpfiles
     install -D -m644 "php-fpm.tmpfiles" "${pkgdir}/usr/lib/tmpfiles.d/${_build_fpm_service_name}.conf"
     popd
@@ -1789,6 +1803,9 @@ package_php___PHPBASE___-embed___SUFFIX___() {
     _sapi="embed"
     pkgdesc="Embedded PHP SAPI library for ${pkgbase}"
     depends=("${pkgbase}=${pkgver}" 'ncurses' 'libxcrypt' 'acl' 'ncurses')
+    if ((build_systemd)); then
+        depends+=('systemd-libs')
+    fi
     depends+=("${_sapi_depends[@]}")
     options=('!emptydirs')
     if ((_build_ini_per_sapi)); then
